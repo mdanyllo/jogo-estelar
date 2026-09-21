@@ -1,0 +1,5 @@
+{
+  "name": "jogo-estelar-server",
+  "private": true,
+  "type": "module"
+}
