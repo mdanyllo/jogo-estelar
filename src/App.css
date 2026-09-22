@@ -25,6 +25,61 @@
   color: var(--text-muted);
 }
 
+.lang-switch {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.lang-button {
+  position: relative;
+  overflow: hidden;
+  width: 52px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  filter: grayscale(1);
+  opacity: 0.5;
+  transition: opacity 120ms ease, filter 120ms ease, border-color 120ms ease;
+}
+
+.lang-button:not(.lang-button-active):hover {
+  opacity: 0.8;
+}
+
+.lang-button-active {
+  filter: none;
+  opacity: 1;
+  border-color: var(--text);
+}
+
+.flag {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.lang-label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.42);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
 .content {
   flex: 1;
   width: 100%;
@@ -199,6 +254,26 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.countdown {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.countdown-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.countdown-clock {
+  margin-top: 4px;
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2px;
 }
 
 .restart:hover {

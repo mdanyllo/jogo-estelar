@@ -1,13 +1,15 @@
+import { DEFAULT_LANG } from './i18n';
 import { getPlayerId } from './playerId';
 
 const BASE_URL = '/api/game';
 
-async function request(path, options = {}) {
+async function request(path, lang, options = {}) {
   const response = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       'x-player-id': getPlayerId(),
+      'x-lang': lang || DEFAULT_LANG,
       ...options.headers
     }
   });
@@ -23,14 +25,14 @@ async function request(path, options = {}) {
   return data;
 }
 
-export function fetchGame() {
-  return request('');
+export function fetchGame(lang) {
+  return request('', lang);
 }
 
-export function sendGuess(guess) {
-  return request('/guess', { method: 'POST', body: JSON.stringify({ guess }) });
+export function sendGuess(guess, lang) {
+  return request('/guess', lang, { method: 'POST', body: JSON.stringify({ guess }) });
 }
 
-export function resetGame() {
-  return request('/reset', { method: 'POST' });
+export function resetGame(lang) {
+  return request('/reset', lang, { method: 'POST' });
 }

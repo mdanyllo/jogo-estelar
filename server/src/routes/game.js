@@ -1,10 +1,10 @@
 import { Router } from 'express'
 import { config } from '../config.js'
-import { getDateKey, getWordOfTheDay } from '../dailyWord.js'
+import { getDateKey, getNextResetAt, getWordOfTheDay } from '../dailyWord.js'
 import { evaluateGuess } from '../evaluate.js'
 import { getGame, resetGame, removeExpiredGames } from '../gameStore.js'
 import { normalizeWord } from '../normalize.js'
-import { isValidWord } from '../words.js'
+import { isValidWord, resolveLang } from '../words.js'
 
 export const gameRouter = Router()
 
@@ -14,35 +14,43 @@ function requirePlayerId(request, response, next) {
     return response.status(400).json({ error: 'PLAYER_ID_REQUIRED' })
   }
   request.playerId = playerId
+  request.lang = resolveLang(request.header('x-lang'))
   next()
 }
 
 function buildState(game, answer) {
   return {
     date: game.dateKey,
+    lang: game.lang,
     wordLength: config.wordLength,
     maxAttempts: config.maxAttempts,
     guesses: game.guesses,
     status: game.status,
-    answer: game.status === 'playing' ? null : answer
+    answer: game.status === 'playing' ? null : answer,
+    canRestart: game.status !== 'won',
+    nextResetAt: getNextResetAt(game.dateKey, config.timeZone).toISOString()
   }
 }
 
-function loadContext(playerId) {
+function loadContext(playerId, lang) {
   const dateKey = getDateKey(config.timeZone)
   removeExpiredGames(dateKey)
-  return { dateKey, answer: getWordOfTheDay(dateKey), game: getGame(playerId, dateKey) }
+  return {
+    dateKey,
+    answer: getWordOfTheDay(dateKey, lang),
+    game: getGame(playerId, lang, dateKey)
+  }
 }
 
 gameRouter.use(requirePlayerId)
 
 gameRouter.get('/', (request, response) => {
-  const { game, answer } = loadContext(request.playerId)
+  const { game, answer } = loadContext(request.playerId, request.lang)
   response.json(buildState(game, answer))
 })
 
 gameRouter.post('/guess', (request, response) => {
-  const { game, answer } = loadContext(request.playerId)
+  const { game, answer } = loadContext(request.playerId, request.lang)
 
   if (game.status !== 'playing') {
     return response.status(409).json({ error: 'GAME_OVER' })
@@ -54,7 +62,7 @@ gameRouter.post('/guess', (request, response) => {
     return response.status(400).json({ error: 'INVALID_LENGTH' })
   }
 
-  if (!isValidWord(guess)) {
+  if (!isValidWord(guess, request.lang)) {
     return response.status(400).json({ error: 'WORD_NOT_FOUND' })
   }
 
@@ -70,7 +78,12 @@ gameRouter.post('/guess', (request, response) => {
 })
 
 gameRouter.post('/reset', (request, response) => {
-  const dateKey = getDateKey(config.timeZone)
-  const game = resetGame(request.playerId, dateKey)
-  response.json(buildState(game, getWordOfTheDay(dateKey)))
+  const { game, answer, dateKey } = loadContext(request.playerId, request.lang)
+
+  if (game.status === 'won') {
+    return response.status(409).json({ error: 'LOCKED_UNTIL_MIDNIGHT' })
+  }
+
+  const nextGame = resetGame(request.playerId, request.lang, dateKey)
+  response.json(buildState(nextGame, answer))
 })

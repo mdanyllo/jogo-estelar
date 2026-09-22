@@ -1,24 +1,24 @@
 const games = new Map()
 
-function buildKey(playerId, dateKey) {
-  return `${playerId}:${dateKey}`
+function buildKey(playerId, lang, dateKey) {
+  return `${playerId}:${lang}:${dateKey}`
 }
 
-function createGame(playerId, dateKey) {
-  return { playerId, dateKey, guesses: [], status: 'playing' }
+function createGame(playerId, lang, dateKey) {
+  return { playerId, lang, dateKey, guesses: [], status: 'playing' }
 }
 
-export function getGame(playerId, dateKey) {
-  const key = buildKey(playerId, dateKey)
+export function getGame(playerId, lang, dateKey) {
+  const key = buildKey(playerId, lang, dateKey)
   if (!games.has(key)) {
-    games.set(key, createGame(playerId, dateKey))
+    games.set(key, createGame(playerId, lang, dateKey))
   }
   return games.get(key)
 }
 
-export function resetGame(playerId, dateKey) {
-  const key = buildKey(playerId, dateKey)
-  const game = createGame(playerId, dateKey)
+export function resetGame(playerId, lang, dateKey) {
+  const key = buildKey(playerId, lang, dateKey)
+  const game = createGame(playerId, lang, dateKey)
   games.set(key, game)
   return game
 }

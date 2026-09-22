@@ -4,9 +4,9 @@ const ROWS = [
   ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
 ];
 
-const LABELS = { ENTER: 'Enter', BACKSPACE: 'Apagar' };
+export default function Keyboard({ letterStates, texts, onKey }) {
+  const labels = { ENTER: texts.enter, BACKSPACE: texts.backspace };
 
-export default function Keyboard({ letterStates, onKey }) {
   return (
     <div className="keyboard">
       {ROWS.map((row, index) => (
@@ -19,7 +19,7 @@ export default function Keyboard({ letterStates, onKey }) {
 
             return (
               <button key={key} type="button" className={classes.join(' ')} onClick={() => onKey(key)}>
-                {LABELS[key] || key}
+                {labels[key] || key}
               </button>
             );
           })}
